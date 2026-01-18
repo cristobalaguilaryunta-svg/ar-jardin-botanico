@@ -38,21 +38,22 @@
   <!-- ESCENA AR -->
   <a-scene embedded arjs>
 
-  <!-- TEXTO FLOTANTE EN AR -->
+    <!-- TEXTO FLOTANTE EN AR -->
     <a-entity id="textEntity"
               position="0 1 -2"
               text="value: Cargando...; color: #000; width: 2;">
     </a-entity>
 
-    <!-- PANEL PNG FLOTANTE (imagen) -->
-<a-plane id="panelImagen"
-         src="url(imagenes/logotipo medio ambiente ayuntamiento.png)"
-         position="1 1 -2"
-         width="1.2"
-         height="1.6"
-         visible="false">
-</a-plane>
-
+    <!-- ========================================================= -->
+    <!-- PANEL PNG FLOTANTE (imagen)                              -->
+    <!-- Se activa solo si la planta tiene "imagen" en data.js     -->
+    <!-- ========================================================= -->
+    <a-plane id="panelImagen"
+             position="1 1 -2"
+             width="1.2"
+             height="1.6"
+             visible="false">
+    </a-plane>
 
     <!-- MODELOS 3D (se generan dinámicamente) -->
     <a-entity id="modelContainer"></a-entity>
@@ -110,7 +111,18 @@
     });
 
     // ============================================================
-    // 4. Modelos 3D (varios)
+    // 4. Mostrar imagen PNG si existe
+    // ============================================================
+    const panelImagen = document.getElementById("panelImagen");
+    if (planta.imagen) {
+      panelImagen.setAttribute("src", `url(${planta.imagen})`);
+      panelImagen.setAttribute("visible", true);
+    } else {
+      panelImagen.setAttribute("visible", false);
+    }
+
+    // ============================================================
+    // 5. Modelos 3D (varios)
     // ============================================================
     const modelContainer = document.getElementById("modelContainer");
     modelContainer.innerHTML = ""; // limpiar
@@ -127,7 +139,7 @@
     }
 
     // ============================================================
-    // 5. Video flotante
+    // 6. Video flotante
     // ============================================================
     if (planta.video) {
       const videoSrc = document.getElementById("videoSrc");
@@ -139,7 +151,7 @@
     }
 
     // ============================================================
-    // 6. Audio ambiente en loop
+    // 7. Audio ambiente en loop
     // ============================================================
     if (planta.audioAmbiente) {
       document.getElementById("audioAmbiente")
@@ -147,7 +159,7 @@
     }
 
     // ============================================================
-    // 7. Audio explicativo
+    // 8. Audio explicativo
     // ============================================================
     if (planta.audioExplicativo) {
       document.getElementById("audioExplicativo")
