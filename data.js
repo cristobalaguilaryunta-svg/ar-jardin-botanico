@@ -3,6 +3,9 @@ const PLANT_DATA = {
   ENCINA: {
     nombre: "Encina (Quercus ilex)",
     descripcion: "Árbol mediterráneo de hoja perenne, muy resistente a la sequía.",
+    
+    // Logotipo de Medio ambiente del Ayuntamiento
+    imagen: "imagenes/logotipo_medio_ambiente_ayuntamiento.png",
 
     // Lista de PDFs (puedes poner 1, 2, 5…)
     pdf: [
