@@ -7,68 +7,45 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #ffffff; overflow: hidden; }
+        body { margin: 0; font-family: sans-serif; background-color: #ffffff; }
         model-viewer { width: 100vw; height: 100vh; }
 
-        /* Estilo para las imágenes que flotan (Logo y Ficha) */
-        .ImagenFlotante {
-            border: none;
-            background: none;
-            padding: 0;
-            pointer-events: none; /* No son botones, son visuales */
-        }
+        /* Estilo para el logo y la ficha */
+        .ImagenFlotante { border: none; background: none; pointer-events: none; }
+        .img-logo { width: 150px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .img-ficha { width: 250px; border: 4px solid white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
-        .ImagenFlotante img {
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            display: block;
-        }
-
-        .img-logo { width: 180px; } /* Logo ligeramente más pequeño para equilibrio */
-        .img-ficha { width: 300px; border: 4px solid white; }
-
-        /* Botón de AR - Crucial para que el usuario entre en el modo cámara */
+        /* Botón de AR */
         #ar-button {
             background-color: #27ae60;
             border-radius: 30px;
             border: none;
             position: absolute;
-            bottom: 40px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 16px 30px;
+            padding: 16px 28px;
             color: white;
             font-weight: bold;
-            font-size: 18px;
             z-index: 999;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        /* Hotspots de información (Botones en el árbol) */
+        /* Hotspots de texto */
         .Hotspot { 
-            background: #ffffff; 
-            border-radius: 25px; 
+            background: #fff; 
+            border-radius: 20px; 
             border: 2px solid #27ae60; 
-            padding: 10px 18px; 
+            padding: 8px 12px; 
             font-weight: bold; 
-            color: #1a1a1a;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 14px;
         }
 
-        /* Panel de texto personalizado (Evita pantalla negra) */
+        /* Panel de información */
         #panel-info {
-            display: none; position: fixed; bottom: 130px; left: 50%; 
-            transform: translateX(-50%); background: white; padding: 25px; 
-            border-radius: 20px; width: 85%; max-width: 450px; z-index: 2000; 
-            text-align: center; border: 4px solid #27ae60; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-        }
-
-        #panel-info p { font-size: 17px; color: #333; margin-bottom: 15px; line-height: 1.5; }
-        
-        #btn-cerrar {
-            background: #27ae60; color: white; border: none; padding: 12px 25px; 
-            border-radius: 12px; font-weight: bold; cursor: pointer;
+            display: none; position: fixed; bottom: 100px; left: 50%; 
+            transform: translateX(-50%); background: white; padding: 20px; 
+            border-radius: 15px; width: 80%; z-index: 2000; text-align: center; 
+            border: 2px solid #27ae60; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -76,37 +53,35 @@
 
     <div id="panel-info">
         <p id="texto-info"></p>
-        <button id="btn-cerrar" onclick="document.getElementById('panel-info').style.display='none'">Cerrar información</button>
+        <button onclick="document.getElementById('panel-info').style.display='none'">Cerrar</button>
     </div>
 
     <model-viewer 
-        id="visor-ar"
         src="modelos/lyocrypt-tree-2743.glb" 
         ar 
-        ar-modes="scene-viewer webxr quick-look" 
-        ar-scale="auto" 
+        ar-modes="webxr quick-look" 
+        ar-scale="auto"
+        ar-placement="floor"
         camera-controls 
-        shadow-intensity="1.5"
-        shadow-softness="1"
-        environment-image="neutral"
+        shadow-intensity="1"
         touch-action="pan-y">
         
-        <button slot="ar-button" id="ar-button">🌿 VER EN TU JARDÍN</button>
+        <button slot="ar-button" id="ar-button">🌿 ENTRAR EN REALIDAD AUMENTADA</button>
 
-        <div class="ImagenFlotante" slot="hotspot-logo" data-position="-6.0m 2.2m -1.0m">
+        <div class="ImagenFlotante" slot="hotspot-logo" data-position="-3.5m 1.5m -0.5m">
             <img src="imagenes/logo_medio_ambiente.png" class="img-logo">
         </div>
 
-        <div class="ImagenFlotante" slot="hotspot-ficha" data-position="6.0m 2.2m -1.0m">
+        <div class="ImagenFlotante" slot="hotspot-ficha" data-position="3.5m 1.5m -0.5m">
             <img src="imagenes/pdf_albaricoque.png" class="img-ficha">
         </div>
 
-        <button class="Hotspot" slot="hotspot-materia" data-position="0.12m 1.88m 0m" onclick="mostrarInfo('Materia Orgánica: Clave para que el naranjo amargo crezca fuerte y sano.')">
+        <button class="Hotspot" slot="hotspot-1" data-position="0.12m 1.88m 0m" onclick="mostrarInfo('Materia Orgánica: Clave para el suelo.')">
             Materia Orgánica
         </button>
 
-        <button class="Hotspot" slot="hotspot-tronco" data-position="-0.27m 3.05m -0.15m" onclick="mostrarInfo('Tronco: Su estructura permite el transporte de agua y nutrientes a las hojas.')">
-            Tronco o raíz
+        <button class="Hotspot" slot="hotspot-2" data-position="-0.27m 3.05m -0.15m" onclick="mostrarInfo('Tronco: Soporte resistente.')">
+            Tronco
         </button>
 
     </model-viewer>
@@ -115,21 +90,12 @@
 
     <script>
         const audio = document.getElementById('musica');
-
         function mostrarInfo(texto) {
             document.getElementById('texto-info').innerText = texto;
             document.getElementById('panel-info').style.display = 'block';
-            reproducirAudio();
+            if (audio.paused) audio.play();
         }
-
-        function reproducirAudio() {
-            if (audio.paused) {
-                audio.play().catch(e => console.log("Esperando clic para sonar"));
-            }
-        }
-
-        // Activar música con cualquier toque inicial
-        document.addEventListener('click', reproducirAudio, { once: true });
+        document.addEventListener('click', () => { if (audio.paused) audio.play(); }, { once: true });
     </script>
 </body>
 </html>
