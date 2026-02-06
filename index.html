@@ -1,128 +1,111 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Jardín Botánico AR - Naranjo Amargo</title>
+    <title>Jardín Botánico AR</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #f0f3f5; overflow: hidden; }
-        model-viewer { width: 100vw; height: 100vh; background-color: #ffffff; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #ffffff; overflow: hidden; }
+        model-viewer { width: 100vw; height: 100vh; }
 
-        /* Botón de Realidad Aumentada - Visible y claro */
+        /* Estilo para las imágenes que flotan (Logo y Ficha) */
+        .ImagenFlotante {
+            border: none;
+            background: none;
+            padding: 0;
+            pointer-events: none; /* No son botones, son visuales */
+        }
+
+        .ImagenFlotante img {
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            display: block;
+        }
+
+        .img-logo { width: 180px; } /* Logo ligeramente más pequeño para equilibrio */
+        .img-ficha { width: 300px; border: 4px solid white; }
+
+        /* Botón de AR - Crucial para que el usuario entre en el modo cámara */
         #ar-button {
             background-color: #27ae60;
             border-radius: 30px;
             border: none;
             position: absolute;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 16px 28px;
+            padding: 16px 30px;
             color: white;
             font-weight: bold;
             font-size: 18px;
             z-index: 999;
-            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        /* Ficha técnica flotante */
-        .Ficha img { 
-            width: 300px; 
-            border-radius: 15px; 
-            border: 5px solid white; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-        }
-
-        /* Estilo de los puntos de información (Hotspots) */
+        /* Hotspots de información (Botones en el árbol) */
         .Hotspot { 
             background: #ffffff; 
-            border-radius: 20px; 
+            border-radius: 25px; 
             border: 2px solid #27ae60; 
-            padding: 8px 16px; 
-            font-weight: bold;
-            color: #2c3e50;
+            padding: 10px 18px; 
+            font-weight: bold; 
+            color: #1a1a1a;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* Panel de información personalizado (evita el fallo de pantalla negra) */
+        /* Panel de texto personalizado (Evita pantalla negra) */
         #panel-info {
-            display: none; 
-            position: fixed; 
-            bottom: 120px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: white; 
-            padding: 20px; 
-            border-radius: 20px; 
-            width: 80%; 
-            max-width: 400px;
-            z-index: 2000; 
-            text-align: center; 
-            border: 3px solid #27ae60; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: none; position: fixed; bottom: 130px; left: 50%; 
+            transform: translateX(-50%); background: white; padding: 25px; 
+            border-radius: 20px; width: 85%; max-width: 450px; z-index: 2000; 
+            text-align: center; border: 4px solid #27ae60; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
 
-        #panel-info p { margin: 0 0 15px 0; font-size: 16px; line-height: 1.4; color: #333; }
+        #panel-info p { font-size: 17px; color: #333; margin-bottom: 15px; line-height: 1.5; }
         
-        #panel-info button {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* Instrucciones superiores */
-        #instrucciones {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.9);
-            padding: 8px 15px;
-            border-radius: 15px;
-            font-size: 13px;
-            z-index: 100;
-            pointer-events: none;
-            border: 1px solid #ddd;
+        #btn-cerrar {
+            background: #27ae60; color: white; border: none; padding: 12px 25px; 
+            border-radius: 12px; font-weight: bold; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div id="instrucciones">Si no abre cámara, usa el dedo para explorar 👆</div>
-
     <div id="panel-info">
         <p id="texto-info"></p>
-        <button onclick="cerrarInfo()">Cerrar</button>
+        <button id="btn-cerrar" onclick="document.getElementById('panel-info').style.display='none'">Cerrar información</button>
     </div>
 
     <model-viewer 
+        id="visor-ar"
         src="modelos/lyocrypt-tree-2743.glb" 
         ar 
-        ar-modes="webxr quick-look" 
+        ar-modes="scene-viewer webxr quick-look" 
+        ar-scale="auto" 
         camera-controls 
-        shadow-intensity="1"
+        shadow-intensity="1.5"
+        shadow-softness="1"
         environment-image="neutral"
-        exposure="1">
+        touch-action="pan-y">
         
-        <button slot="ar-button" id="ar-button">
-            🌿 VER EN EL JARDÍN
-        </button>
+        <button slot="ar-button" id="ar-button">🌿 VER EN TU JARDÍN</button>
 
-        <button class="Ficha" slot="hotspot-ficha" data-position="6.5m 2.2m -1.5m" data-normal="0 0 1">
-            <img src="imagenes/pdf_albaricoque.png">
-        </button>
+        <div class="ImagenFlotante" slot="hotspot-logo" data-position="-6.0m 2.2m -1.0m">
+            <img src="imagenes/logo_medio_ambiente.png" class="img-logo">
+        </div>
 
-        <button class="Hotspot" slot="hotspot-1" data-position="0.12m 1.88m 0m" onclick="mostrarInfo('Materia Orgánica: El naranjo amargo prefiere suelos bien drenados y ricos en nutrientes orgánicos.')">
+        <div class="ImagenFlotante" slot="hotspot-ficha" data-position="6.0m 2.2m -1.0m">
+            <img src="imagenes/pdf_albaricoque.png" class="img-ficha">
+        </div>
+
+        <button class="Hotspot" slot="hotspot-materia" data-position="0.12m 1.88m 0m" onclick="mostrarInfo('Materia Orgánica: Clave para que el naranjo amargo crezca fuerte y sano.')">
             Materia Orgánica
         </button>
 
-        <button class="Hotspot" slot="hotspot-2" data-position="-0.27m 3.05m -0.15m" onclick="mostrarInfo('Tronco y Raíces: Su madera es muy apreciada en ebanistería y sus raíces deben estar bien aireadas.')">
+        <button class="Hotspot" slot="hotspot-tronco" data-position="-0.27m 3.05m -0.15m" onclick="mostrarInfo('Tronco: Su estructura permite el transporte de agua y nutrientes a las hojas.')">
             Tronco o raíz
         </button>
 
@@ -131,28 +114,22 @@
     <audio id="musica" loop src="audio/fondo.mp3"></audio>
 
     <script>
-        // Función para mostrar información sin salir de la cámara
+        const audio = document.getElementById('musica');
+
         function mostrarInfo(texto) {
             document.getElementById('texto-info').innerText = texto;
             document.getElementById('panel-info').style.display = 'block';
-            activarSonido(); // Intentamos activar sonido al tocar un punto
+            reproducirAudio();
         }
 
-        function cerrarInfo() {
-            document.getElementById('panel-info').style.display = 'none';
-        }
-
-        // Función para el sonido (debe ser activada por el usuario)
-        function activarSonido() {
-            const audio = document.getElementById('musica');
+        function reproducirAudio() {
             if (audio.paused) {
-                audio.play().catch(e => console.log("Esperando interacción para audio"));
+                audio.play().catch(e => console.log("Esperando clic para sonar"));
             }
         }
 
-        // Activar sonido también al primer toque en cualquier sitio
-        document.addEventListener('click', activarSonido, { once: true });
+        // Activar música con cualquier toque inicial
+        document.addEventListener('click', reproducirAudio, { once: true });
     </script>
-
 </body>
 </html>
