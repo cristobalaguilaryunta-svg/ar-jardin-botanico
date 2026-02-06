@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Jardín Botánico AR</title>
+    <title>Jardín Botánico AR - Naranjo Amargo</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    
     <style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f3f5; }
-        model-viewer { width: 100vw; height: 100vh; --poster-color: transparent; }
-        
-        /* BOTÓN PARA ACTIVAR CÁMARA */
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #f0f3f5; overflow: hidden; }
+        model-viewer { width: 100vw; height: 100vh; background-color: #ffffff; }
+
+        /* Botón de Realidad Aumentada - Visible y claro */
         #ar-button {
             background-color: #27ae60;
             border-radius: 30px;
@@ -24,12 +25,9 @@
             font-size: 18px;
             z-index: 999;
             box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        /* FICHA TÉCNICA (A 6.5 metros) */
+        /* Ficha técnica flotante */
         .Ficha img { 
             width: 300px; 
             border-radius: 15px; 
@@ -37,36 +35,70 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
         }
 
-        /* BOTONES INTERACTIVOS */
+        /* Estilo de los puntos de información (Hotspots) */
         .Hotspot { 
-            background: #fff; 
-            border-radius: 25px; 
+            background: #ffffff; 
+            border-radius: 20px; 
             border: 2px solid #27ae60; 
-            padding: 8px 15px; 
-            cursor: pointer; 
+            padding: 8px 16px; 
             font-weight: bold;
             color: #2c3e50;
+            cursor: pointer;
         }
 
-        /* MENSAJE DE AYUDA */
+        /* Panel de información personalizado (evita el fallo de pantalla negra) */
+        #panel-info {
+            display: none; 
+            position: fixed; 
+            bottom: 120px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: white; 
+            padding: 20px; 
+            border-radius: 20px; 
+            width: 80%; 
+            max-width: 400px;
+            z-index: 2000; 
+            text-align: center; 
+            border: 3px solid #27ae60; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        #panel-info p { margin: 0 0 15px 0; font-size: 16px; line-height: 1.4; color: #333; }
+        
+        #panel-info button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Instrucciones superiores */
         #instrucciones {
             position: absolute;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255,255,255,0.8);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            text-align: center;
+            background: rgba(255,255,255,0.9);
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 13px;
+            z-index: 100;
             pointer-events: none;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
 
-    <div id="instrucciones">
-        Si no ves tu cámara, gira el árbol con el dedo 👆
+    <div id="instrucciones">Si no abre cámara, usa el dedo para explorar 👆</div>
+
+    <div id="panel-info">
+        <p id="texto-info"></p>
+        <button onclick="cerrarInfo()">Cerrar</button>
     </div>
 
     <model-viewer 
@@ -79,19 +111,19 @@
         exposure="1">
         
         <button slot="ar-button" id="ar-button">
-            <span>🌿</span> VER EN EL JARDÍN
+            🌿 VER EN EL JARDÍN
         </button>
 
         <button class="Ficha" slot="hotspot-ficha" data-position="6.5m 2.2m -1.5m" data-normal="0 0 1">
             <img src="imagenes/pdf_albaricoque.png">
         </button>
 
-        <button class="Hotspot" slot="hotspot-1" data-position="0.12m 1.88m 0m" onclick="alert('Materia Orgánica: Clave para el Naranjo Amargo')">
+        <button class="Hotspot" slot="hotspot-1" data-position="0.12m 1.88m 0m" onclick="mostrarInfo('Materia Orgánica: El naranjo amargo prefiere suelos bien drenados y ricos en nutrientes orgánicos.')">
             Materia Orgánica
         </button>
 
-        <button class="Hotspot" slot="hotspot-2" data-position="-0.27m 3.05m -0.15m" onclick="alert('Tronco: Estructura resistente')">
-            Tronco
+        <button class="Hotspot" slot="hotspot-2" data-position="-0.27m 3.05m -0.15m" onclick="mostrarInfo('Tronco y Raíces: Su madera es muy apreciada en ebanistería y sus raíces deben estar bien aireadas.')">
+            Tronco o raíz
         </button>
 
     </model-viewer>
@@ -99,11 +131,27 @@
     <audio id="musica" loop src="audio/fondo.mp3"></audio>
 
     <script>
-        // Al tocar cualquier parte, intentamos activar el audio
-        document.addEventListener('click', () => {
+        // Función para mostrar información sin salir de la cámara
+        function mostrarInfo(texto) {
+            document.getElementById('texto-info').innerText = texto;
+            document.getElementById('panel-info').style.display = 'block';
+            activarSonido(); // Intentamos activar sonido al tocar un punto
+        }
+
+        function cerrarInfo() {
+            document.getElementById('panel-info').style.display = 'none';
+        }
+
+        // Función para el sonido (debe ser activada por el usuario)
+        function activarSonido() {
             const audio = document.getElementById('musica');
-            audio.play().catch(() => console.log("Audio esperando interacción"));
-        }, { once: true });
+            if (audio.paused) {
+                audio.play().catch(e => console.log("Esperando interacción para audio"));
+            }
+        }
+
+        // Activar sonido también al primer toque en cualquier sitio
+        document.addEventListener('click', activarSonido, { once: true });
     </script>
 
 </body>
