@@ -1,172 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>AR Planta Individual</title>
+    <title>Jardín Botánico AR</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <style>
+        body { margin: 0; font-family: sans-serif; }
+        model-viewer { width: 100vw; height: 100vh; background-color: #f8f9fa; }
 
-  <!-- Motor 3D A-Frame -->
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+        /* Estilo para los Hotspots de la planta */
+        .Hotspot {
+            background: #fff; border-radius: 20px; border: 2px solid #27ae60;
+            padding: 6px 12px; cursor: pointer; font-weight: bold;
+        }
 
-  <!-- AR.js para WebAR sin apps -->
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.2/aframe/build/aframe-ar.js"></script>
+        /* Ficha técnica separada a la derecha */
+        .FichaContenedor {
+            background: none; border: none; padding: 0;
+            pointer-events: none; /* No estorba al rotar el modelo */
+        }
+        .FichaContenedor img {
+            width: 280px; /* Un poco más grande para leerla bien de lejos */
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 3px solid white;
+        }
 
-  <!-- Datos de la planta -->
-  <script src="data.js"></script>
-
-  <style>
-    #infoPanel {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,0.9);
-      padding: 15px 20px;
-      border-radius: 12px;
-      max-width: 80%;
-      text-align: center;
-      font-family: sans-serif;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-  </style>
+        /* Panel de texto inferior */
+        #infoPanel {
+            display: none; position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%); background: white;
+            padding: 20px; border-radius: 15px; width: 80%;
+            z-index: 1000; text-align: center;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
+<body>
 
-<body style="margin:0; overflow:hidden;">
+    <div id="infoPanel">
+        <p id="infoText" style="margin: 0; font-size: 18px;"></p>
+        <button onclick="document.getElementById('infoPanel').style.display='none'" style="margin-top:10px; padding:10px 20px;">Cerrar</button>
+    </div>
 
-  <!-- PANEL DE INFORMACIÓN HTML -->
-  <div id="infoPanel"></div>
+    <model-viewer 
+        src="modelos/lyocrypt-tree-2743.glb" 
+        ar ar-modes="webxr scene-viewer quick-look" 
+        camera-controls shadow-intensity="1">
+        
+        <button class="FichaContenedor" slot="hotspot-ficha" data-position="2.5m 2.0m -1.0m" data-normal="0 0 1">
+            <img src="imagenes/pdf_albaricoque.png">
+        </button>
 
-  <!-- ESCENA AR -->
-  <a-scene embedded arjs>
+        <button class="Hotspot" slot="hotspot-1" data-position="0.127m 1.882m 0.000m" onclick="hablar('Materia Orgánica: Nutrientes para el suelo.')">
+            <span>Materia Orgánica</span>
+        </button>
 
-    <!-- TEXTO FLOTANTE EN AR -->
-    <a-entity id="textEntity"
-              position="0 1 -2"
-              text="value: Cargando...; color: #000; width: 2;">
-    </a-entity>
+        <button class="Hotspot" slot="hotspot-2" data-position="-0.271m 3.056m -0.151m" onclick="hablar('Tronco: Estructura principal de la planta.')">
+            <span>Tronco o raíz</span>
+        </button>
 
-    <!-- ========================================================= -->
-    <!-- PANEL PNG FLOTANTE (imagen)                              -->
-    <!-- Se activa solo si la planta tiene "imagen" en data.js     -->
-    <!-- ========================================================= -->
-    <a-plane id="panelImagen"
-             position="1 1 -2"
-             width="1.2"
-             height="1.6"
-             visible="false">
-    </a-plane>
+        <button class="Hotspot" slot="hotspot-5" data-position="-0.045m 4.477m 0.461m" onclick="hablar('Hojas: Realizan la fotosíntesis.')">
+            <span>Hojas</span>
+        </button>
 
-    <!-- MODELOS 3D (se generan dinámicamente) -->
-    <a-entity id="modelContainer"></a-entity>
+    </model-viewer>
 
-    <!-- VIDEO FLOTANTE -->
-    <a-video id="videoPlanta" visible="false"
-             width="1.5" height="0.9"
-             position="0 0.5 -2">
-    </a-video>
+    <audio id="musica" loop src="audio/fondo.mp3"></audio>
 
-    <video id="videoSrc" style="display:none" autoplay loop muted></video>
-
-    <!-- AUDIO AMBIENTE -->
-    <a-entity id="audioAmbiente"></a-entity>
-
-    <!-- AUDIO EXPLICATIVO -->
-    <a-entity id="audioExplicativo"></a-entity>
-
-  </a-scene>
-
-  <script>
-    // ============================================================
-    // 1. Cargar la planta desde ?planta=ENCINA
-    // ============================================================
-    const params = new URLSearchParams(window.location.search);
-    const plantaID = params.get("planta");
-    const planta = PLANT_DATA[plantaID];
-
-    if (!planta) {
-      document.getElementById("infoPanel").innerHTML = "Planta no encontrada";
-      throw new Error("Planta no encontrada");
-    }
-
-    // ============================================================
-    // 2. Panel HTML con texto y PDFs
-    // ============================================================
-    let pdfLinks = "";
-    if (planta.pdf) {
-      pdfLinks = planta.pdf.map(p => `<a href="${p}" target="_blank">Abrir PDF</a><br>`).join("");
-    }
-
-    document.getElementById("infoPanel").innerHTML = `
-      <h2>${planta.nombre}</h2>
-      <p>${planta.descripcion}</p>
-      ${pdfLinks}
-    `;
-
-    // ============================================================
-    // 3. Texto flotante en AR
-    // ============================================================
-    document.getElementById("textEntity").setAttribute("text", {
-      value: planta.nombre,
-      color: "#000",
-      width: 2
-    });
-
-    // ============================================================
-    // 4. Mostrar imagen PNG si existe
-    // ============================================================
-    const panelImagen = document.getElementById("panelImagen");
-    if (planta.imagen) {
-      panelImagen.setAttribute("src", `url(${planta.imagen})`);
-      panelImagen.setAttribute("visible", true);
-    } else {
-      panelImagen.setAttribute("visible", false);
-    }
-
-    // ============================================================
-    // 5. Modelos 3D (varios)
-    // ============================================================
-    const modelContainer = document.getElementById("modelContainer");
-    modelContainer.innerHTML = ""; // limpiar
-
-    if (planta.modelos3d) {
-      planta.modelos3d.forEach((modelo, i) => {
-        const y = i * 0.7; // apilar modelos verticalmente
-        const entity = document.createElement("a-entity");
-        entity.setAttribute("gltf-model", `url(${modelo})`);
-        entity.setAttribute("position", `0 ${y} -2`);
-        entity.setAttribute("scale", "0.5 0.5 0.5");
-        modelContainer.appendChild(entity);
-      });
-    }
-
-    // ============================================================
-    // 6. Video flotante
-    // ============================================================
-    if (planta.video) {
-      const videoSrc = document.getElementById("videoSrc");
-      const video = document.getElementById("videoPlanta");
-
-      videoSrc.src = planta.video;
-      video.setAttribute("src", "#videoSrc");
-      video.setAttribute("visible", true);
-    }
-
-    // ============================================================
-    // 7. Audio ambiente en loop
-    // ============================================================
-    if (planta.audioAmbiente) {
-      document.getElementById("audioAmbiente")
-        .setAttribute("sound", `src: url(${planta.audioAmbiente}); autoplay: true; loop: true;`);
-    }
-
-    // ============================================================
-    // 8. Audio explicativo
-    // ============================================================
-    if (planta.audioExplicativo) {
-      document.getElementById("audioExplicativo")
-        .setAttribute("sound", `src: url(${planta.audioExplicativo}); autoplay: true;`);
-    }
-
-  </script>
-
+    <script>
+        let sonidoOk = false;
+        function hablar(txt) {
+            if(!sonidoOk) { document.getElementById('musica').play(); sonidoOk = true; }
+            document.getElementById('infoText').innerText = txt;
+            document.getElementById('infoPanel').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
