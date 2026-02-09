@@ -7,7 +7,7 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <style>
         body { margin: 0; background-color: #ffffff; font-family: sans-serif; overflow: hidden; }
-        model-viewer { width: 100vw; height: 100vh; --poster-color: transparent; }
+        model-viewer { width: 100vw; height: 100vh; }
         
         #ar-button {
             background-color: #27ae60; border-radius: 30px; border: none;
@@ -15,36 +15,21 @@
             padding: 16px 28px; color: white; font-weight: bold; z-index: 999;
         }
 
-        /* Contenedores de imágenes */
-        .ImagenFlotante { 
-            border: none; 
-            background: white; 
-            border-radius: 12px;
-            pointer-events: auto;
-        }
-
-        .img-logo { width: 180px; display: block; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .img-ficha { width: 380px; display: block; border: 4px solid white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
+        .ImagenFlotante { border: none; background: white; border-radius: 12px; }
+        .img-logo { width: 160px; display: block; border-radius: 10px; }
+        .img-ficha { width: 340px; display: block; border: 4px solid white; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         
-        /* EL CAMBIO CLAVE ESTÁ AQUÍ */
         .Hotspot { 
-            background: #fff; border-radius: 20px; border: 2px solid #27ae60; 
-            padding: 8px 15px; font-weight: bold; font-size: 14px; color: #2c3e50;
-            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: opacity 0.3s;
+            background: rgba(255, 255, 255, 0.9); border-radius: 20px; border: 2px solid #27ae60; 
+            padding: 6px 12px; font-weight: bold; font-size: 13px; color: #2c3e50;
+            cursor: pointer;
         }
 
-        /* Esta línea hace que la etiqueta se oculte si el modelo la tapa */
-        .Hotspot:not([data-visible]) {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
         #panel-info {
             display: none; position: fixed; bottom: 120px; left: 50%; 
             transform: translateX(-50%); background: white; padding: 20px; 
             border-radius: 20px; width: 85%; max-width: 400px; z-index: 2000; 
-            text-align: center; border: 3px solid #27ae60; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center; border: 3px solid #27ae60;
         }
     </style>
 </head>
@@ -52,42 +37,28 @@
 
     <div id="panel-info">
         <p id="texto-info" style="font-size: 18px; line-height: 1.4; margin-bottom: 15px;"></p>
-        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold;">Entendido</button>
+        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">Cerrar</button>
     </div>
 
     <model-viewer 
         src="modelo.glb" 
-        ar 
-        ar-modes="webxr quick-look" 
-        ar-scale="auto" 
-        ar-placement="floor" 
-        camera-controls 
-        shadow-intensity="1"
-        camera-orbit="0deg 75deg 5m"
-        field-of-view="30deg"
+        ar ar-modes="webxr quick-look" ar-scale="auto" ar-placement="floor" 
+        camera-controls shadow-intensity="1"
         touch-action="pan-y">
         
         <button slot="ar-button" id="ar-button">🌿 INICIAR EXPERIENCIA AR</button>
 
-        <div class="ImagenFlotante" slot="hotspot-logo" data-position="-3.5m 1.8m 0.5m">
+        <div class="ImagenFlotante" slot="hotspot-logo" data-position="-4m 2m 0m">
             <img src="logo.png" class="img-logo">
         </div>
 
-        <div class="ImagenFlotante" slot="hotspot-ficha" data-position="3.8m 1.8m 1.2m">
+        <div class="ImagenFlotante" slot="hotspot-ficha" data-position="4m 2m 0m">
             <img src="ficha.png" class="img-ficha">
         </div>
 
-        <button class="Hotspot" slot="hotspot-1" data-position="0.12m 1.2m 0.2m" onclick="mostrarInfo('Sustrato: Mezcla rica en materia orgánica.')">
-            Sustrato
-        </button>
-        
-        <button class="Hotspot" slot="hotspot-2" data-position="-0.27m 2.8m -0.1m" onclick="mostrarInfo('Hojas: Perennes y aromáticas.')">
-            Hojas
-        </button>
-
-        <button class="Hotspot" slot="hotspot-3" data-position="0.05m 1.8m 0.1m" onclick="mostrarInfo('Tronco: Madera dura y corteza lisa.')">
-            Tronco
-        </button>
+        <button class="Hotspot" slot="hotspot-1" data-position="0.2m 0.6m 0.1m" onclick="mostrarInfo('Sustrato: Tierra fértil con buen drenaje.')">Sustrato</button>
+        <button class="Hotspot" slot="hotspot-2" data-position="-0.3m 2.6m 0.1m" onclick="mostrarInfo('Hojas: Verdes, perennes y muy aromáticas.')">Hojas</button>
+        <button class="Hotspot" slot="hotspot-3" data-position="0.1m 1.6m 0.1m" onclick="mostrarInfo('Tronco: Madera resistente y corteza lisa.')">Tronco</button>
 
     </model-viewer>
 
