@@ -15,7 +15,7 @@
             display: flex; justify-content: center; gap: 8px; z-index: 100;
         }
         .btn-info {
-            background: white; border: 2px solid #27ae60; border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9); border: 2px solid #27ae60; border-radius: 12px;
             padding: 6px 14px; font-weight: bold; font-size: 11px; color: #1a1a1a;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -23,10 +23,10 @@
         /* LOGO: Esquina superior */
         .logo-fijo { 
             position: absolute; top: 45px; left: 10px; width: 65px; 
-            z-index: 50; opacity: 0.95;
+            z-index: 50; opacity: 0.85;
         }
 
-        /* FICHA: Posición fija a 65px del fondo */
+        /* FICHA: Posición original con transparencia suave */
         .ficha-fija { 
             position: absolute; 
             bottom: 65px; 
@@ -37,6 +37,7 @@
             border-radius: 10px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
             transition: all 0.3s ease;
+            opacity: 0.9;
         }
 
         /* Ampliación al tocar */
@@ -44,13 +45,15 @@
             width: 320px; 
             bottom: 80px; 
             z-index: 1000; 
+            opacity: 1;
         }
 
-        /* BOTÓN VERDE: Subido para acercarse a la ficha */
+        /* BOTÓN VERDE: Subido más cerca del borde inferior de la ficha */
         #ar-button {
-            background-color: #27ae60; border-radius: 30px; border: none;
+            background-color: rgba(39, 174, 96, 0.9); /* Transparencia recuperada */
+            border-radius: 30px; border: none;
             position: absolute; 
-            bottom: 35px; /* Ajuste para subirlo y acercarlo a la ficha */
+            bottom: 55px; /* Subida definitiva */
             left: 50%; 
             transform: translateX(-50%);
             padding: 14px 24px; color: white; font-weight: bold; z-index: 999;
@@ -78,7 +81,7 @@
     <img src="ficha.png" class="ficha-fija">
 
     <div id="panel-info">
-        <p id="texto-info" style="font-size: 18px; line-height: 1.5;"></p>
+        <p id="texto-info"></p>
         <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:12px 25px; border-radius:10px; font-weight:bold; cursor:pointer;">Cerrar</button>
     </div>
 
