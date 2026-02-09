@@ -7,7 +7,24 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <style>
         body { margin: 0; background-color: #ffffff; font-family: sans-serif; overflow: hidden; }
-        model-viewer { width: 100vw; height: 100vh; }
+        
+        /* El visor ocupa toda la pantalla pero sin etiquetas pesadas */
+        model-viewer { width: 100vw; height: 100vh; background-color: #f0f0f0; }
+
+        /* Contenedor de botones fijos (No pesan nada para el procesador) */
+        .controles-fijos {
+            position: absolute; top: 20px; width: 100%;
+            display: flex; justify-content: center; gap: 10px; z-index: 100;
+        }
+
+        .btn-info {
+            background: white; border: 2px solid #27ae60; border-radius: 15px;
+            padding: 8px 15px; font-weight: bold; font-size: 14px;
+        }
+
+        /* Ficha y Logo a los lados (Fijos para que no estorben el giro) */
+        .logo-fijo { position: absolute; top: 80px; left: 10px; width: 80px; z-index: 50; border-radius: 5px; }
+        .ficha-fija { position: absolute; bottom: 100px; right: 10px; width: 150px; z-index: 50; border: 2px solid white; border-radius: 8px; }
 
         #ar-button {
             background-color: #27ae60; border-radius: 30px; border: none;
@@ -15,54 +32,36 @@
             padding: 16px 28px; color: white; font-weight: bold; z-index: 999;
         }
 
-        /* Imágenes Opacas */
-        .ImagenFlotante { background: white; border-radius: 12px; }
-        .img-logo { width: 150px; border-radius: 10px; display: block; }
-        .img-ficha { width: 320px; border-radius: 12px; border: 4px solid white; display: block; }
-
-        /* Hotspots Sólidos (Sin transparencias) */
-        .Hotspot { 
-            background: #ffffff; border-radius: 20px; border: 3px solid #27ae60; 
-            padding: 10px 18px; font-weight: bold; font-size: 14px; color: #1a1a1a;
-            cursor: pointer; opacity: 1 !important; /* Forzamos opacidad total */
-        }
-
         #panel-info {
-            display: none; position: fixed; bottom: 120px; left: 50%; 
-            transform: translateX(-50%); background: white; padding: 20px; 
-            border-radius: 20px; width: 85%; max-width: 400px; z-index: 2000; 
-            text-align: center; border: 4px solid #27ae60;
+            display: none; position: fixed; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); background: white; padding: 20px; 
+            border-radius: 20px; width: 80%; z-index: 2000; border: 4px solid #27ae60;
         }
     </style>
 </head>
 <body>
 
+    <div class="controles-fijos">
+        <button class="btn-info" onclick="mostrarInfo('HOJAS: Perennes y aromáticas.')">HOJAS</button>
+        <button class="btn-info" onclick="mostrarInfo('TRONCO: Madera dura y lisa.')">TRONCO</button>
+        <button class="btn-info" onclick="mostrarInfo('SUSTRATO: Tierra rica en nutrientes.')">SUSTRATO</button>
+    </div>
+
+    <img src="logo.png" class="logo-fijo">
+    <img src="ficha.png" class="ficha-fija" onclick="this.style.width='90%'; this.style.right='5%'; this.style.bottom='20%';" ondblclick="this.style.width='150px'; this.style.right='10px';">
+
     <div id="panel-info">
-        <p id="texto-info"></p>
-        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">Entendido</button>
+        <p id="texto-info" style="font-size: 18px; text-align: center;"></p>
+        <center><button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px;">Cerrar</button></center>
     </div>
 
     <model-viewer 
         src="modelo.glb" 
-        ar ar-modes="webxr quick-look" ar-scale="auto" ar-placement="floor" 
+        ar ar-modes="webxr quick-look" ar-scale="auto"
         camera-controls 
-        interaction-prompt="none"
+        auto-rotate
         touch-action="pan-y">
-        
-        <button slot="ar-button" id="ar-button">🌿 ABRIR EN AR</button>
-
-        <div class="ImagenFlotante" slot="hotspot-logo" data-position="-3.5m 2m 0.5m">
-            <img src="logo.png" class="img-logo">
-        </div>
-
-        <div class="ImagenFlotante" slot="hotspot-ficha" data-position="3.5m 2m 0.5m">
-            <img src="ficha.png" class="img-ficha">
-        </div>
-
-        <button class="Hotspot" slot="hotspot-1" data-position="0.5m 0.5m 0.8m" onclick="mostrarInfo('SUSTRATO: Tierra fértil.')">Sustrato</button>
-        <button class="Hotspot" slot="hotspot-2" data-position="-0.5m 3m 0.8m" onclick="mostrarInfo('HOJAS: Perennes y aromáticas.')">Hojas</button>
-        <button class="Hotspot" slot="hotspot-3" data-position="0.2m 1.8m 0.8m" onclick="mostrarInfo('TRONCO: Corteza lisa grisácea.')">Tronco</button>
-
+        <button slot="ar-button" id="ar-button">🌿 VER EN REALIDAD AUMENTADA</button>
     </model-viewer>
 
     <audio id="musica" loop src="fondo.mp3"></audio>
