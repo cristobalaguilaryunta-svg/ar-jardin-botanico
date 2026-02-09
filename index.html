@@ -1,101 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Jardín Botánico AR</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jardín Botánico AR - Panel</title>
     <style>
-        body { margin: 0; font-family: sans-serif; background-color: #ffffff; }
-        model-viewer { width: 100vw; height: 100vh; }
-
-        /* Estilo para el logo y la ficha */
-        .ImagenFlotante { border: none; background: none; pointer-events: none; }
-        .img-logo { width: 150px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .img-ficha { width: 250px; border: 4px solid white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-
-        /* Botón de AR */
-        #ar-button {
-            background-color: #27ae60;
-            border-radius: 30px;
-            border: none;
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 16px 28px;
-            color: white;
-            font-weight: bold;
-            z-index: 999;
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        h1 { color: #27ae60; margin-bottom: 30px; }
+        .container { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        .proyecto-btn { 
+            display: block; background: #27ae60; color: white; padding: 15px; 
+            margin: 10px 0; text-decoration: none; border-radius: 12px; 
+            font-weight: bold; transition: transform 0.2s; 
         }
-
-        /* Hotspots de texto */
-        .Hotspot { 
-            background: #fff; 
-            border-radius: 20px; 
-            border: 2px solid #27ae60; 
-            padding: 8px 12px; 
-            font-weight: bold; 
-            font-size: 14px;
-        }
-
-        /* Panel de información */
-        #panel-info {
-            display: none; position: fixed; bottom: 100px; left: 50%; 
-            transform: translateX(-50%); background: white; padding: 20px; 
-            border-radius: 15px; width: 80%; z-index: 2000; text-align: center; 
-            border: 2px solid #27ae60; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
+        .proyecto-btn:hover { transform: scale(1.05); background: #219150; }
+        .status { font-size: 12px; color: #7f8c8d; margin-top: 20px; }
     </style>
 </head>
 <body>
-
-    <div id="panel-info">
-        <p id="texto-info"></p>
-        <button onclick="document.getElementById('panel-info').style.display='none'">Cerrar</button>
+    <div class="container">
+        <h1>🌿 Mis Proyectos</h1>
+        <div id="lista-proyectos">
+            <a href="prueba1/" class="btn proyecto-btn">🚀 Ir a Prueba 1</a>
+        </div>
+        <p class="status">Protegido por robots.txt</p>
     </div>
-
-    <model-viewer 
-        src="modelos/lyocrypt-tree-2743.glb" 
-        ar 
-        ar-modes="webxr quick-look" 
-        ar-scale="auto"
-        ar-placement="floor"
-        camera-controls 
-        shadow-intensity="1"
-        touch-action="pan-y">
-        
-        <button slot="ar-button" id="ar-button">🌿 ENTRAR EN REALIDAD AUMENTADA</button>
-
-        <div class="ImagenFlotante" slot="hotspot-logo" data-position="-3.5m 1.5m -0.5m">
-            <img src="imagenes/logo_medio_ambiente.png" class="img-logo">
-        </div>
-
-        <div class="ImagenFlotante" slot="hotspot-ficha" data-position="3.5m 1.5m -0.5m">
-            <img src="imagenes/pdf_albaricoque.png" class="img-ficha">
-        </div>
-
-        <button class="Hotspot" slot="hotspot-1" data-position="0.12m 1.88m 0m" onclick="mostrarInfo('Materia Orgánica: Clave para el suelo.')">
-            Materia Orgánica
-        </button>
-
-        <button class="Hotspot" slot="hotspot-2" data-position="-0.27m 3.05m -0.15m" onclick="mostrarInfo('Tronco: Soporte resistente.')">
-            Tronco
-        </button>
-
-    </model-viewer>
-
-    <audio id="musica" loop src="audio/fondo.mp3"></audio>
-
-    <script>
-        const audio = document.getElementById('musica');
-        function mostrarInfo(texto) {
-            document.getElementById('texto-info').innerText = texto;
-            document.getElementById('panel-info').style.display = 'block';
-            if (audio.paused) audio.play();
-        }
-        document.addEventListener('click', () => { if (audio.paused) audio.play(); }, { once: true });
-    </script>
 </body>
 </html>
