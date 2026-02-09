@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>AR Jardín Botánico</title>
+    <title>AR Jardín Botánico - Naranjo Amargo</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -9,7 +9,7 @@
         body { margin: 0; background-color: #ffffff; font-family: sans-serif; overflow: hidden; }
         model-viewer { width: 100vw; height: 100vh; background-color: #f8f8f8; }
 
-        /* Botones superiores */
+        /* INTERFAZ FIJA (Lo que ya funcionaba) */
         .controles-fijos {
             position: absolute; top: 10px; width: 100%;
             display: flex; justify-content: center; gap: 8px; z-index: 100;
@@ -19,46 +19,35 @@
             padding: 6px 14px; font-weight: bold; font-size: 11px; color: #1a1a1a;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        /* LOGO: Esquina superior */
-        .logo-fijo { 
-            position: absolute; top: 45px; left: 10px; width: 65px; 
-            z-index: 50; opacity: 0.85;
-        }
-
-        /* FICHA: Posición original con transparencia suave */
+        .logo-fijo { position: absolute; top: 45px; left: 10px; width: 65px; z-index: 50; opacity: 0.85; }
+        
         .ficha-fija { 
-            position: absolute; 
-            bottom: 65px; 
-            right: 15px; 
-            width: 150px; 
-            z-index: 50; 
-            border: 3px solid white; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-            transition: all 0.3s ease;
-            opacity: 0.9;
+            position: absolute; bottom: 65px; right: 15px; width: 150px; 
+            z-index: 50; border: 3px solid white; border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease; opacity: 0.9;
         }
+        .ficha-fija:active { width: 320px; bottom: 80px; z-index: 1000; opacity: 1; }
 
-        /* Ampliación al tocar */
-        .ficha-fija:active { 
-            width: 320px; 
-            bottom: 80px; 
-            z-index: 1000; 
-            opacity: 1;
-        }
-
-        /* BOTÓN VERDE: Subido más cerca del borde inferior de la ficha */
+        /* BOTÓN AR: Subido y con transparencia */
         #ar-button {
-            background-color: rgba(39, 174, 96, 0.9); /* Transparencia recuperada */
-            border-radius: 30px; border: none;
-            position: absolute; 
-            bottom: 55px; /* Subida definitiva */
-            left: 50%; 
-            transform: translateX(-50%);
+            background-color: rgba(39, 174, 96, 0.9); border-radius: 30px; border: none;
+            position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%);
             padding: 14px 24px; color: white; font-weight: bold; z-index: 999;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            font-size: 13px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 13px;
+        }
+
+        /* ESTILO PARA LOS PUNTOS EN 3D (HOTSPOTS) */
+        .Hotspot {
+            background: #fff; border-radius: 32px; border: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); box-sizing: border-box;
+            cursor: pointer; height: 24px; width: 24px; padding: 0;
+        }
+        .Hotspot:not([data-visible]) { opacity: 0; pointer-events: none; }
+        .HotspotAnnotation {
+            background: #fff; border-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            color: rgba(0, 0, 0, 0.8); display: block; font-size: 12px; font-weight: 700;
+            left: calc(100% + 1em); padding: 0.5em 1em; position: absolute;
+            top: 50%; transform: translateY(-50%); width: max-content;
         }
 
         #panel-info {
@@ -72,9 +61,9 @@
 <body>
 
     <div class="controles-fijos">
-        <button class="btn-info" onclick="mostrarInfo('HOJAS: Perennes, coriáceas y con un aroma cítrico muy intenso.')">HOJAS</button>
-        <button class="btn-info" onclick="mostrarInfo('TRONCO: Estructura de madera dura con corteza lisa grisácea.')">TRONCO</button>
-        <button class="btn-info" onclick="mostrarInfo('SUSTRATO: Tierra rica en materia orgánica y con buen drenaje.')">SUSTRATO</button>
+        <button class="btn-info" onclick="mostrarInfo('HOJAS: Perennes, coriáceas y aromáticas.')">HOJAS</button>
+        <button class="btn-info" onclick="mostrarInfo('TRONCO: Madera dura con corteza lisa gris.')">TRONCO</button>
+        <button class="btn-info" onclick="mostrarInfo('SUSTRATO: Mezcla rica en materia orgánica.')">SUSTRATO</button>
     </div>
 
     <img src="logo.png" class="logo-fijo">
@@ -82,17 +71,34 @@
 
     <div id="panel-info">
         <p id="texto-info"></p>
-        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:12px 25px; border-radius:10px; font-weight:bold; cursor:pointer;">Cerrar</button>
+        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:bold;">Cerrar</button>
     </div>
 
     <model-viewer 
         src="modelo.glb" 
-        ar ar-modes="webxr quick-look" ar-scale="auto"
+        ar 
+        ar-modes="webxr scene-viewer quick-look" 
+        ar-scale="fixed" 
+        ar-placement="floor"
         camera-controls 
-        auto-rotate
+        auto-rotate 
+        shadow-intensity="2"
+        shadow-softness="0.5"
         interaction-prompt="none"
         touch-action="pan-y">
+
         <button slot="ar-button" id="ar-button">🌿 INICIAR EXPERIENCIA AR</button>
+
+        <button class="Hotspot" slot="hotspot-1" data-position="0.2m 0.6m 0.3m" data-normal="0m 1m 0m" onclick="mostrarInfo('Sustrato: Base de tierra fértil.')">
+            <div class="HotspotAnnotation">Sustrato</div>
+        </button>
+        <button class="Hotspot" slot="hotspot-2" data-position="-0.3m 2.6m 0.3m" data-normal="0m 0m 1m" onclick="mostrarInfo('Hojas: Brotes de Naranjo.')">
+            <div class="HotspotAnnotation">Hojas</div>
+        </button>
+        <button class="Hotspot" slot="hotspot-3" data-position="0.1m 1.6m 0.3m" data-normal="1m 0m 0m" onclick="mostrarInfo('Tronco: Eje principal.')">
+            <div class="HotspotAnnotation">Tronco</div>
+        </button>
+
     </model-viewer>
 
     <audio id="musica" loop src="fondo.mp3"></audio>
