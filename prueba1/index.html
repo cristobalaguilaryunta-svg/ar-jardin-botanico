@@ -1,33 +1,105 @@
-<model-viewer 
-    src="modelo.glb" 
-    ar 
-    ar-modes="webxr scene-viewer quick-look" 
-    ar-scale="fixed" 
-    ar-placement="floor"
-    camera-controls 
-    auto-rotate 
-    shadow-intensity="2.5" 
-    shadow-softness="0.2"
-    exposure="1.2"
-    environment-image="neutral"
-    interaction-prompt="auto"
-    interaction-prompt-style="wiggle"
-    touch-action="pan-y">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>AR Jardín Botánico</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+    
+    <style>
+        body { margin: 0; background-color: #ffffff; font-family: sans-serif; overflow: hidden; }
+        model-viewer { width: 100vw; height: 100vh; background-color: #f8f8f8; }
 
-    <button slot="ar-button" id="ar-button">🌿 INICIAR EXPERIENCIA AR</button>
+        /* INTERFAZ SUPERIOR */
+        .controles-fijos {
+            position: absolute; top: 10px; width: 100%;
+            display: flex; justify-content: center; gap: 8px; z-index: 100;
+        }
+        .btn-info {
+            background: rgba(255, 255, 255, 0.9); border: 2px solid #27ae60; border-radius: 12px;
+            padding: 8px 14px; font-weight: bold; font-size: 11px; color: #1a1a1a;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 2px solid #27ae60;
+        }
 
-    <button class="Hotspot" slot="hotspot-1" 
-        data-surface="0 0 45 42 41 0.2 0.3 0.5" 
-        data-position="0.2m 0.6m 0.3m" 
-        onclick="mostrarInfo('SUSTRATO: Base sólida de tierra.')">
-        <div class="HotspotAnnotation">Sustrato</div>
-    </button>
+        /* LOGO Y FICHA */
+        .logo-fijo { position: absolute; top: 55px; left: 10px; width: 65px; z-index: 50; opacity: 0.85; }
+        .ficha-fija { 
+            position: absolute; bottom: 65px; right: 15px; width: 150px; 
+            z-index: 50; border: 3px solid white; border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease;
+        }
+        .ficha-fija:active { width: 300px; bottom: 80px; z-index: 1000; }
 
-    <button class="Hotspot" slot="hotspot-2" 
-        data-surface="1 0 12 15 18 0.5 0.5 0.5"
-        data-position="-0.3m 2.6m 0.3m" 
-        onclick="mostrarInfo('HOJAS: Aroma cítrico natural.')">
-        <div class="HotspotAnnotation">Hojas</div>
-    </button>
+        /* BOTÓN AR */
+        #ar-button {
+            background-color: #27ae60; border-radius: 30px; border: none;
+            position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%);
+            padding: 14px 24px; color: white; font-weight: bold; z-index: 999;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
 
-</model-viewer>
+        /* PUNTOS DE INFORMACIÓN (HOTSPOTS) */
+        .Hotspot {
+            background: #fff; border-radius: 32px; border: 2px solid #27ae60;
+            width: 20px; height: 20px; cursor: pointer;
+        }
+        .HotspotAnnotation {
+            background: #fff; border-radius: 4px; padding: 4px 8px;
+            color: #333; font-size: 12px; font-weight: bold;
+            position: absolute; transform: translate(10px, -50%);
+        }
+
+        /* PANEL DE TEXTO */
+        #panel-info {
+            display: none; position: fixed; top: 45%; left: 50%; 
+            transform: translate(-50%, -50%); background: white; padding: 25px; 
+            border-radius: 20px; width: 75%; z-index: 2000; border: 4px solid #27ae60;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controles-fijos">
+        <button onclick="mostrar('HOJAS: Perennes.')" class="btn-info">HOJAS</button>
+        <button onclick="mostrar('TRONCO: Madera dura.')" class="btn-info">TRONCO</button>
+        <button onclick="mostrar('SUSTRATO: Tierra fértil.')" class="btn-info">SUSTRATO</button>
+    </div>
+
+    <img src="logo.png" class="logo-fijo">
+    <img src="ficha.png" class="ficha-fija">
+
+    <div id="panel-info">
+        <p id="texto-info"></p>
+        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px;">Cerrar</button>
+    </div>
+
+    <model-viewer 
+        src="modelo.glb" 
+        ar ar-modes="webxr scene-viewer quick-look" 
+        ar-scale="fixed" ar-placement="floor"
+        camera-controls auto-rotate 
+        shadow-intensity="2" 
+        interaction-prompt="auto">
+
+        <button slot="ar-button" id="ar-button">🌿 INICIAR EXPERIENCIA AR</button>
+
+        <button class="Hotspot" slot="hotspot-1" data-position="0.2m 0.6m 0.2m" onclick="mostrar('Sustrato: Base de tierra.')">
+            <div class="HotspotAnnotation">Sustrato</div>
+        </button>
+
+    </model-viewer>
+
+    <audio id="musica" loop src="fondo.mp3"></audio>
+
+    <script>
+        const audio = document.getElementById('musica');
+        function mostrar(m) {
+            document.getElementById('texto-info').innerText = m;
+            document.getElementById('panel-info').style.display = 'block';
+            if (audio.paused) audio.play();
+        }
+        document.addEventListener('click', () => { if (audio.paused) audio.play(); }, { once: true });
+    </script>
+</body>
+</html>
