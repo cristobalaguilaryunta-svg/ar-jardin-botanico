@@ -1,66 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>AR Botánico - Versión Final Estable</title>
+    <title>AR Botánico - Edición Final</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <style>
-        body { margin: 0; background-color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-        model-viewer { width: 100vw; height: 100vh; background-color: #f0f0f0; }
+        body { margin: 0; background-color: #ffffff; font-family: sans-serif; overflow: hidden; }
+        model-viewer { width: 100vw; height: 100vh; background-color: #f8f8f8; }
 
-        /* INTERFAZ DE USUARIO (FLOTANTE) */
-        .ui-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10;
+        /* --- INTERFAZ ORIGINAL (NO TOCAR) --- */
+        .controles-fijos {
+            position: absolute; top: 10px; width: 100%;
+            display: flex; justify-content: center; gap: 8px; z-index: 100;
         }
-        .ui-overlay * { pointer-events: auto; }
+        .btn-info {
+            background: rgba(255, 255, 255, 0.9); border: 2px solid #27ae60; border-radius: 12px;
+            padding: 8px 14px; font-weight: bold; font-size: 11px; color: #1a1a1a;
+        }
+        .logo-fijo { position: absolute; top: 45px; left: 10px; width: 65px; z-index: 50; }
+        .ficha-fija { 
+            position: absolute; bottom: 65px; right: 15px; width: 150px; 
+            z-index: 50; border: 3px solid white; border-radius: 10px; transition: all 0.3s ease;
+        }
+        .ficha-fija:active { width: 320px; bottom: 80px; }
 
-        .controles-superiores {
-            position: absolute; top: 15px; width: 100%;
-            display: flex; justify-content: center; gap: 10px;
-        }
-        .btn-categoria {
-            background: rgba(255, 255, 255, 0.9); border: 2px solid #27ae60;
-            border-radius: 12px; padding: 10px 15px; font-weight: bold;
-            font-size: 11px; color: #1a1a1a; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .logo { position: absolute; top: 65px; left: 15px; width: 70px; opacity: 0.9; }
-        
-        .ficha-tecnica { 
-            position: absolute; bottom: 85px; right: 15px; width: 145px; 
-            border: 3px solid white; border-radius: 12px; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3); transition: width 0.3s ease-in-out;
-        }
-        .ficha-tecnica:active { width: 290px; }
-
-        /* BOTÓN AR (EL QUE SÍ FUNCIONA) */
         #ar-button-custom {
-            background-color: #27ae60; color: white; border: none;
-            border-radius: 30px; padding: 15px 28px; font-weight: bold;
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.5); font-size: 14px;
+            background-color: #27ae60; border-radius: 30px; border: none;
+            position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%);
+            padding: 14px 24px; color: white; font-weight: bold; z-index: 999;
+            font-size: 13px;
         }
 
-        /* ESTILO DE LOS PUNTOS (HOTSPOTS) */
+        /* --- HOTSPOTS ORIGINALES --- */
         .Hotspot {
-            background: #fff; border-radius: 50%; border: 3px solid #27ae60;
-            width: 22px; height: 22px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            background: #fff; border-radius: 50%; border: 2px solid #27ae60;
+            width: 18px; height: 18px; cursor: pointer;
         }
         .HotspotAnnotation {
-            background: #fff; border-radius: 6px; padding: 6px 12px;
-            color: #333; font-size: 12px; font-weight: bold;
-            position: absolute; transform: translate(25px, -50%);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); width: max-content;
+            background: #fff; border-radius: 4px; padding: 4px 8px;
+            color: #333; font-size: 11px; font-weight: bold;
+            position: absolute; transform: translate(20px, -50%);
         }
 
-        /* PANEL DE INFORMACIÓN */
+        /* --- BLOQUE DE TEXTO LARGO (SOLO PARA RA) --- */
+        .TextoLargoRA {
+            display: none; /* Invisible en el visor 3D normal */
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px; border-left: 10px solid #27ae60;
+            padding: 20px; color: #1a1a1a; width: 250px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            font-size: 14px; line-height: 1.5;
+        }
+
+        /* El truco: Solo se muestra cuando el móvil entra en RA */
+        model-viewer[ar-status="session-started"] .TextoLargoRA {
+            display: block;
+        }
+
         #panel-info {
             display: none; position: fixed; top: 45%; left: 50%; 
             transform: translate(-50%, -50%); background: white; padding: 25px; 
-            border-radius: 20px; width: 75%; z-index: 2000; border: 4px solid #27ae60;
-            text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-radius: 20px; width: 75%; z-index: 2000; border: 4px solid #27ae60; text-align: center;
         }
     </style>
 </head>
@@ -68,68 +69,56 @@
 
     <model-viewer 
         src="modelo.glb" 
-        ar 
-        ar-modes="webxr scene-viewer" 
-        ar-placement="floor"
-        ar-scale="fixed"
+        ar ar-modes="webxr scene-viewer" 
+        ar-placement="floor" ar-scale="fixed"
         scale="0.5 0.5 0.5"
-        camera-controls 
-        auto-rotate
-        shadow-intensity="2" 
-        shadow-softness="0.4"
-        exposure="1.2"
+        camera-controls auto-rotate
+        shadow-intensity="2" shadow-softness="0.5"
         touch-action="pan-y">
 
         <button slot="ar-button" style="display:none;"></button>
 
-        <button class="Hotspot" slot="hotspot-base" data-position="0 0.1 0.1" onclick="mostrarInfo('SUSTRATO: Base nutritiva para cítricos.')">
+        <button class="Hotspot" slot="hotspot-1" data-position="0 0.1 0.1" onclick="mostrarInfo('SUSTRATO: Tierra fértil.')">
             <div class="HotspotAnnotation">Sustrato</div>
         </button>
 
-        <button class="Hotspot" slot="hotspot-tronco" data-position="0 0.7 0" onclick="mostrarInfo('TRONCO: Madera joven y resistente.')">
+        <button class="Hotspot" slot="hotspot-2" data-position="0 0.8 0" onclick="mostrarInfo('TRONCO: Madera resistente.')">
             <div class="HotspotAnnotation">Tronco</div>
         </button>
 
-        <button class="Hotspot" slot="hotspot-hojas" data-position="0 1.4 0" onclick="mostrarInfo('HOJAS: Fotosíntesis activa.')">
-            <div class="HotspotAnnotation">Hojas</div>
-        </button>
+        <div slot="hotspot-extra" data-position="-0.7 1.2 0" data-normal="-1 0 0">
+            <div class="TextoLargoRA">
+                <b style="color:#27ae60; font-size:16px;">INFORMACIÓN DEL EJEMPLAR</b><br>
+                Este Naranjo Amargo (Citrus Aurantium) es un ejemplar seleccionado por su vigorosidad. 
+                En este modo de Realidad Aumentada puedes apreciar su escala real y detalles botánicos 
+                en tu propio entorno. Ideal para estudios de paisajismo y botánica aplicada.
+            </div>
+        </div>
 
     </model-viewer>
 
-    <div class="ui-overlay">
-        <div class="controles-superiores">
-            <button class="btn-categoria" onclick="mostrarInfo('HOJAS: Perennes y aromáticas.')">HOJAS</button>
-            <button class="btn-categoria" onclick="mostrarInfo('TRONCO: Corteza lisa gris.')">TRONCO</button>
-            <button class="btn-categoria" onclick="mostrarInfo('SUSTRATO: Tierra orgánica.')">SUSTRATO</button>
-        </div>
-
-        <img src="logo.png" class="logo">
-        <img src="ficha.png" class="ficha-tecnica">
-
-        <button id="ar-button-custom" onclick="document.querySelector('model-viewer').activateAR()">
-            🌿 INICIAR EXPERIENCIA AR
-        </button>
+    <div class="controles-fijos">
+        <button class="btn-info" onclick="mostrarInfo('HOJAS: Perennes.')">HOJAS</button>
+        <button class="btn-info" onclick="mostrarInfo('TRONCO: Estructura sólida.')">TRONCO</button>
     </div>
 
+    <img src="logo.png" class="logo-fijo">
+    <img src="ficha.png" class="ficha-fija">
+
+    <button id="ar-button-custom" onclick="document.querySelector('model-viewer').activateAR()">
+        🌿 INICIAR EXPERIENCIA AR
+    </button>
+
     <div id="panel-info">
-        <p id="texto-info" style="font-size: 18px; line-height: 1.4;"></p>
-        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:12px 25px; border-radius:10px; font-weight:bold; cursor:pointer;">CERRAR</button>
+        <p id="texto-info"></p>
+        <button onclick="document.getElementById('panel-info').style.display='none'" style="background:#27ae60; color:white; border:none; padding:10px 20px; border-radius:10px;">Cerrar</button>
     </div>
 
     <script>
-        const audio = new Audio('fondo.mp3');
-        audio.loop = true;
-
         function mostrarInfo(m) {
             document.getElementById('texto-info').innerText = m;
             document.getElementById('panel-info').style.display = 'block';
-            audio.play().catch(e => console.log("Audio en espera de interacción"));
         }
-
-        // Aseguramos que el audio empiece con el primer toque en pantalla
-        document.addEventListener('click', () => {
-            if (audio.paused) audio.play().catch(e => {});
-        }, { once: true });
     </script>
 </body>
 </html>
