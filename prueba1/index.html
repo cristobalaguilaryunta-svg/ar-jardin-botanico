@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>AR Botánico - Versión Final Interactiva</title>
+    <title>AR Botánico - Sonido Restaurado</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
@@ -9,7 +9,7 @@
         body { margin: 0; background-color: #ffffff; font-family: sans-serif; overflow: hidden; }
         model-viewer { width: 100vw; height: 100vh; background-color: #f8f8f8; }
 
-        /* --- INTERFAZ WEB (TU DISEÑO GANADOR) --- */
+        /* --- INTERFAZ WEB ORIGINAL --- */
         .controles-superiores {
             position: absolute; top: 15px; width: 100%;
             display: flex; justify-content: center; gap: 10px; z-index: 100;
@@ -19,16 +19,13 @@
             padding: 10px 18px; font-weight: bold; font-size: 13px; color: #1a1a1a;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;
         }
-
         .logo-fijo { position: absolute; top: 60px; left: 15px; width: 80px; z-index: 50; }
-        
         .ficha-fija { 
             position: absolute; bottom: 120px; right: 15px; width: 160px; 
             z-index: 50; border: 4px solid white; border-radius: 15px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: width 0.3s ease;
         }
         .ficha-fija:active { width: 320px; }
-
         #ar-button-custom {
             background-color: #27ae60; border-radius: 40px; border: none;
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -36,39 +33,24 @@
             box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4); font-size: 15px; cursor: pointer;
         }
 
-        /* --- HOTSPOTS (ESTILO Y COMPORTAMIENTO) --- */
+        /* --- HOTSPOTS --- */
         .Hotspot {
             background: #fff; border-radius: 50%; border: 3px solid #27ae60;
-            width: 22px; height: 22px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            width: 22px; height: 22px; cursor: pointer;
         }
-
-        /* Etiqueta corta (Se ve en Web y RA) */
         .HotspotAnnotation {
             background: #fff; border-radius: 6px; padding: 6px 10px;
             color: #333; font-size: 12px; font-weight: bold;
             position: absolute; transform: translate(25px, -50%);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-
-        /* Panel extenso (SOLO aparece en RA) */
         .InfoExtensaRA {
-            display: none; /* Oculto en la web */
-            background: rgba(255, 255, 255, 0.98);
+            display: none; background: rgba(255, 255, 255, 0.98);
             border-radius: 12px; border-left: 8px solid #27ae60;
             padding: 15px; color: #1a1a1a; width: 220px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            font-size: 13px; line-height: 1.4;
-            position: absolute; transform: translate(30px, -20px);
+            font-size: 13px; line-height: 1.4; position: absolute; transform: translate(30px, -20px);
         }
-
-        /* Activamos el texto largo solo en RA */
-        model-viewer[ar-status="session-started"] .InfoExtensaRA {
-            display: block;
-        }
-        /* Ocultamos la etiqueta corta en RA para que no se pisen */
-        model-viewer[ar-status="session-started"] .HotspotAnnotation {
-            display: none;
-        }
+        model-viewer[ar-status="session-started"] .InfoExtensaRA { display: block; }
+        model-viewer[ar-status="session-started"] .HotspotAnnotation { display: none; }
 
         #panel-info {
             display: none; position: fixed; top: 45%; left: 50%; 
@@ -83,43 +65,32 @@
         src="modelo.glb" 
         ar ar-modes="webxr scene-viewer" 
         ar-placement="floor" ar-scale="fixed"
-        scale="0.5 0.5 0.5"
-        camera-controls auto-rotate
-        shadow-intensity="2" shadow-softness="0.5"
-        exposure="1.2" touch-action="pan-y">
+        scale="0.5 0.5 0.5" camera-controls auto-rotate
+        shadow-intensity="2" shadow-softness="0.5" exposure="1.2">
 
         <button slot="ar-button" style="display:none;"></button>
 
-        <button class="Hotspot" slot="hotspot-hojas" data-position="0 1.4 0.1">
+        <button class="Hotspot" slot="hotspot-hojas" data-position="0 1.4 0.1" onclick="mostrarInfo('HOJAS: Perennes y aromáticas. Fuente de azahar.')">
             <div class="HotspotAnnotation">Hojas</div>
-            <div class="InfoExtensaRA">
-                <b>HOJAS Y AZAHAR</b><br>
-                Hojas perennes y coriáceas. Sus flores blancas (azahar) son el símbolo de la primavera y se usan para aceites esenciales y fragancias únicas.
-            </div>
+            <div class="InfoExtensaRA"><b>HOJAS Y AZAHAR</b><br>Hojas perennes y coriáceas. Sus flores blancas son el símbolo de la primavera.</div>
         </button>
 
-        <button class="Hotspot" slot="hotspot-tronco" data-position="0 0.8 0">
+        <button class="Hotspot" slot="hotspot-tronco" data-position="0 0.8 0" onclick="mostrarInfo('TRONCO: Madera sólida y corteza grisácea.')">
             <div class="HotspotAnnotation">Tronco</div>
-            <div class="InfoExtensaRA">
-                <b>TRONCO Y MADERA</b><br>
-                Posee una corteza lisa y grisácea. Su madera es muy compacta y dura, históricamente utilizada en herramientas y ebanistería fina.
-            </div>
+            <div class="InfoExtensaRA"><b>TRONCO Y MADERA</b><br>Posee una corteza lisa. Su madera es muy compacta y dura.</div>
         </button>
 
-        <button class="Hotspot" slot="hotspot-base" data-position="0 0.1 0.2">
+        <button class="Hotspot" slot="hotspot-base" data-position="0 0.1 0.2" onclick="mostrarInfo('SUSTRATO: Mezcla orgánica de alta calidad.')">
             <div class="HotspotAnnotation">Sustrato</div>
-            <div class="InfoExtensaRA">
-                <b>NARANJO AMARGO</b><br>
-                <i>Citrus aurantium</i>. Introducido por los árabes en el siglo X. Este ejemplar simboliza la sostenibilidad y el patrimonio natural de Andújar.
-            </div>
+            <div class="InfoExtensaRA"><b>SUSTRATO</b><br>Mezcla rica en nutrientes optimizada para cítricos en maceta.</div>
         </button>
 
     </model-viewer>
 
     <div class="controles-superiores">
-        <button class="btn-info" onclick="mostrarInfo('HOJAS: Perennes y muy aromáticas.')">HOJAS</button>
-        <button class="btn-info" onclick="mostrarInfo('TRONCO: Estructura sólida y resistente.')">TRONCO</button>
-        <button class="btn-info" onclick="mostrarInfo('SUSTRATO: Mezcla orgánica de alta calidad.')">SUSTRATO</button>
+        <button class="btn-info" onclick="mostrarInfo('HOJAS: Perennes y aromáticas.')">HOJAS</button>
+        <button class="btn-info" onclick="mostrarInfo('TRONCO: Estructura sólida.')">TRONCO</button>
+        <button class="btn-info" onclick="mostrarInfo('SUSTRATO: Mezcla orgánica fértil.')">SUSTRATO</button>
     </div>
 
     <img src="logo.png" class="logo-fijo">
@@ -135,10 +106,26 @@
     </div>
 
     <script>
+        // Restauramos el motor de audio
+        const audioAmbiente = new Audio('fondo.mp3');
+        audioAmbiente.loop = true;
+
         function mostrarInfo(m) {
             document.getElementById('texto-info').innerText = m;
             document.getElementById('panel-info').style.display = 'block';
+            
+            // Intentar reproducir el audio al interactuar
+            audioAmbiente.play().catch(error => {
+                console.log("El navegador bloqueó el audio automático. Esperando interacción.");
+            });
         }
+
+        // Asegurar que el audio se active con el primer toque en cualquier lugar
+        document.addEventListener('click', () => {
+            if (audioAmbiente.paused) {
+                audioAmbiente.play().catch(e => {});
+            }
+        }, { once: true });
     </script>
 </body>
 </html>
